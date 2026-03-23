@@ -37,3 +37,4 @@ lerna-debug.log*
 *.pid.lock
 *.seed
 *.tsbuildinfo
+supabase/.temp/
