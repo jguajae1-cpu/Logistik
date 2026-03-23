@@ -24,6 +24,7 @@ export function DashboardShell({ profile, children }: Props) {
           {(profile.rol === "cliente" || profile.rol === "admin" || profile.rol === "operador") && (
             <Link href="/tickets/new">Crear ticket</Link>
           )}
+          <Link href="/auth/set-password">Crear o cambiar contrasena</Link>
         </nav>
 
         <div className="sidebar-footer">
