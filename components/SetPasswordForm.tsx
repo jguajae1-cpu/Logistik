@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
@@ -9,8 +10,24 @@ export function SetPasswordForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [hasSession, setHasSession] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function checkSession() {
+      const supabase = getSupabaseBrowserClient();
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
+
+      setHasSession(Boolean(session));
+      setReady(true);
+    }
+
+    void checkSession();
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -45,6 +62,31 @@ export function SetPasswordForm() {
       router.push("/dashboard");
       router.refresh();
     }, 900);
+  }
+
+  if (!ready) {
+    return (
+      <section className="card auth-card">
+        <p className="muted">Validando sesion...</p>
+      </section>
+    );
+  }
+
+  if (!hasSession) {
+    return (
+      <section className="card auth-card">
+        <div>
+          <p className="eyebrow">Sesion requerida</p>
+          <h1>Abre el link del correo</h1>
+          <p className="muted">
+            Para crear o restablecer contrasena necesitas entrar desde el link de email.
+          </p>
+        </div>
+        <Link className="button" href="/login">
+          Ir a login
+        </Link>
+      </section>
+    );
   }
 
   return (

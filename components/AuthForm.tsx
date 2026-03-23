@@ -40,6 +40,27 @@ export function AuthForm() {
     await sendMagicLink("/dashboard", "Revisa tu correo y abre el magic link para ingresar.");
   }
 
+  async function sendRecoveryLink() {
+    setLoading(true);
+    setMessage(null);
+    setError(null);
+
+    const supabase = getSupabaseBrowserClient();
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent("/auth/set-password")}`;
+    const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo
+    });
+
+    if (recoveryError) {
+      setError(recoveryError.message);
+      setLoading(false);
+      return;
+    }
+
+    setMessage("Te enviamos un correo para restablecer y crear una nueva contrasena.");
+    setLoading(false);
+  }
+
   return (
     <form className="card auth-card" onSubmit={handleSubmit}>
       <div>
@@ -76,6 +97,10 @@ export function AuthForm() {
         type="button"
       >
         Crear mi contrasena
+      </button>
+
+      <button className="button button-secondary" disabled={loading} onClick={() => void sendRecoveryLink()} type="button">
+        Restablecer contrasena
       </button>
 
       <p className="muted">
