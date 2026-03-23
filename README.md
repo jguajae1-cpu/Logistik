@@ -1,6 +1,6 @@
-# LogiFlow
+# Logistik
 
-Plataforma logística tipo ticketera construida con Next.js 14 App Router y Supabase, lista para desplegar en Vercel.
+Plataforma logistica tipo ticketera construida con Next.js 14 App Router y Supabase, lista para desplegar en Vercel.
 
 ## Estructura
 
@@ -44,7 +44,7 @@ Plataforma logística tipo ticketera construida con Next.js 14 App Router y Supa
 npm install
 ```
 
-2. Crea el archivo `.env.local`:
+2. Crea `.env.local`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=tu_url
@@ -56,7 +56,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
    - Configura `Site URL` y `Redirect URLs` con `http://localhost:3000/auth/callback` y tu dominio de Vercel.
    - Ejecuta `sql/schema.sql`.
 
-4. Corre el entorno local:
+4. Corre local:
 
 ```bash
 npm run dev
@@ -67,10 +67,10 @@ npm run dev
    - Define `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
    - Publica.
 
-## Buenas prácticas incluidas
+## Buenas practicas incluidas
 
 - App Router con sesiones SSR y middleware.
 - RLS por empresa, transportista y conductor.
-- RPCs para asignación y cambios de estado con auditoría.
+- RPCs para asignacion y cambios de estado con auditoria.
 - Componentes modulares y reutilizables.
 - Base lista para escalar a tracking, GPS y automatizaciones.
