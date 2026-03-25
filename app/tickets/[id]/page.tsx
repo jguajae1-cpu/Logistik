@@ -4,6 +4,7 @@ import { HistorialEstados } from "@/components/tickets/HistorialEstados";
 import { ModalAsignarConductor } from "@/components/tickets/ModalAsignarConductor";
 import { StatusActions } from "@/components/tickets/StatusActions";
 import { requireProfile } from "@/lib/auth/session";
+import { statusLabels } from "@/lib/constants";
 import { getConductores, getTicketById, getTicketHistory, getTransportistas } from "@/lib/data/tickets";
 import { formatDate } from "@/lib/utils";
 import type { Ticket, TicketStatus } from "@/types";
@@ -64,7 +65,7 @@ export default async function TicketDetailPage({ params }: Props) {
         <div className="detail-grid field-full">
           <div>
             <span className="label">Estado</span>
-            <p>{ticket.estado}</p>
+            <p>{statusLabels[ticket.estado]}</p>
           </div>
           <div>
             <span className="label">Empresa</span>
@@ -99,7 +100,7 @@ export default async function TicketDetailPage({ params }: Props) {
         </div>
 
         <div className="field field-full">
-          <span>Descripción</span>
+          <span>Descripcion</span>
           <p>{ticket.descripcion}</p>
         </div>
       </section>

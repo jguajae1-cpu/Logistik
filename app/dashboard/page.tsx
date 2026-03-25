@@ -12,6 +12,7 @@ import {
   getUsuarios
 } from "@/lib/data/tickets";
 import { roleLabels } from "@/lib/constants";
+import type { TicketStatus } from "@/types";
 
 type Props = {
   searchParams?: {
@@ -35,9 +36,18 @@ export default async function DashboardPage({ searchParams }: Props) {
 
   const stats = {
     total: tickets.length,
-    abiertos: tickets.filter((ticket) => ticket.estado !== "entregado").length,
+    pendientes: tickets.filter((ticket) => ticket.estado === "pendiente").length,
+    enCurso: tickets.filter((ticket) =>
+      ["asignado", "en_retiro", "en_transito"].includes(ticket.estado)
+    ).length,
     entregados: tickets.filter((ticket) => ticket.estado === "entregado").length
   };
+
+  const breakdown: Array<{ key: TicketStatus; label: string; value: number }> = [
+    { key: "pendiente", label: "Pendientes", value: stats.pendientes },
+    { key: "asignado", label: "En curso", value: stats.enCurso },
+    { key: "entregado", label: "Entregados", value: stats.entregados }
+  ];
 
   const titleByRole = {
     cliente: "DashboardCliente",
@@ -66,14 +76,12 @@ export default async function DashboardPage({ searchParams }: Props) {
           <span className="label">Tickets</span>
           <strong>{stats.total}</strong>
         </article>
-        <article className="card stats-card">
-          <span className="label">En curso</span>
-          <strong>{stats.abiertos}</strong>
-        </article>
-        <article className="card stats-card">
-          <span className="label">Entregados</span>
-          <strong>{stats.entregados}</strong>
-        </article>
+        {breakdown.map((item) => (
+          <article className="card stats-card" key={item.key}>
+            <span className="label">{item.label}</span>
+            <strong>{item.value}</strong>
+          </article>
+        ))}
       </section>
 
       <FiltroTickets
@@ -90,8 +98,8 @@ export default async function DashboardPage({ searchParams }: Props) {
           <article className="card ticket-card">
             <h3>Sin tickets visibles</h3>
             <p className="muted">
-              La consulta ya respeta RLS, así que este resultado refleja exactamente lo que puede ver
-              tu rol.
+              La consulta ya respeta RLS, asi que este resultado refleja exactamente lo que puede ver tu
+              rol.
             </p>
           </article>
         )}

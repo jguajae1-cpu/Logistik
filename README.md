@@ -1,6 +1,24 @@
 # Logistik
 
-Plataforma logistica tipo ticketera construida con Next.js 14 App Router y Supabase, lista para desplegar en Vercel.
+Plataforma logistica tipo ticketera para gestionar solicitudes de retiro y entrega entre empresas, transportistas y conductores, construida con Next.js 14, TypeScript y Supabase.
+
+## Vision general
+
+Logistik centraliza el ciclo de vida de tickets de transporte de carga. Cada actor opera con permisos acotados:
+
+- `cliente`: crea tickets y consulta los de su empresa
+- `transportista`: gestiona tickets asignados a su organizacion
+- `conductor`: visualiza sus viajes y avanza estados
+- `operador` y `admin`: supervisan toda la operacion, asignan recursos y gestionan usuarios
+
+## Stack tecnologico
+
+- Frontend y framework: Next.js 14 con App Router
+- Lenguaje: TypeScript
+- Backend, autenticacion y base de datos: Supabase + PostgreSQL
+- Sesion SSR: `@supabase/ssr`
+- Estilos: CSS global modular propio en [app/globals.css](C:\Users\eigua\OneDrive\Documentos\New project\app\globals.css)
+- Deploy: Vercel
 
 ## Estructura
 
@@ -8,6 +26,7 @@ Plataforma logistica tipo ticketera construida con Next.js 14 App Router y Supab
 .
 ├── app
 │   ├── auth/callback/route.ts
+│   ├── auth/set-password/page.tsx
 │   ├── dashboard/page.tsx
 │   ├── login/page.tsx
 │   ├── tickets/new/page.tsx
@@ -20,8 +39,20 @@ Plataforma logistica tipo ticketera construida con Next.js 14 App Router y Supab
 │   ├── data
 │   └── supabase
 ├── sql/schema.sql
+├── supabase/config.toml
 └── types/index.ts
 ```
+
+## Arquitectura y seguridad
+
+- El modelo de roles vive en el enum `app_role` dentro de [sql/schema.sql](C:\Users\eigua\OneDrive\Documentos\New project\sql\schema.sql).
+- La tabla [sql/schema.sql](C:\Users\eigua\OneDrive\Documentos\New project\sql\schema.sql) define `empresas`, `transportistas`, `conductores`, `usuarios`, `tickets` e `historial_estados`.
+- `usuarios` extiende `auth.users` con un trigger `bootstrap_user()` para crear el perfil operativo automaticamente.
+- La seguridad se delega a RLS con funciones como `current_role()`, `is_admin_or_operador()` y `can_access_ticket()`.
+- Las operaciones sensibles se encapsulan en funciones RPC:
+  - `set_ticket_status()`
+  - `assign_ticket()`
+- La trazabilidad del ticket se garantiza con `historial_estados` y el trigger `trg_initial_ticket_history`.
 
 ## Flujo visual por rol
 
@@ -38,12 +69,7 @@ Plataforma logistica tipo ticketera construida con Next.js 14 App Router y Supab
 
 ## Levantar el proyecto
 
-1. Instala dependencias:
-
-```bash
-npm install
-```
-
+1. Instala dependencias con `npm install`.
 2. Crea `.env.local`:
 
 ```env
@@ -52,25 +78,19 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
 ```
 
 3. En Supabase:
-   - Activa Email OTP / Magic Link.
-   - Configura `Site URL` y `Redirect URLs` con `http://localhost:3000/auth/callback` y tu dominio de Vercel.
-   - Ejecuta `sql/schema.sql`.
+   - Ejecuta [sql/schema.sql](C:\Users\eigua\OneDrive\Documentos\New project\sql\schema.sql)
+   - Configura Auth con tu `Site URL` y `Redirect URLs`
+4. Ejecuta `npm run dev`.
+5. En Vercel, importa el repo y define las variables publicas de Supabase.
 
-4. Corre local:
+## Buenas practicas aplicadas
 
-```bash
-npm run dev
-```
+- SSR y middleware para manejo de sesion y proteccion de rutas
+- Row Level Security como capa principal de autorizacion
+- Triggers de base de datos para perfiles y trazabilidad
+- Componentes reutilizables y logica separada en `lib/`
+- Base preparada para escalar a tracking, GPS y automatizacion
 
-5. Despliega en Vercel:
-   - Importa el repo.
-   - Define `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-   - Publica.
+## Documento extendido
 
-## Buenas practicas incluidas
-
-- App Router con sesiones SSR y middleware.
-- RLS por empresa, transportista y conductor.
-- RPCs para asignacion y cambios de estado con auditoria.
-- Componentes modulares y reutilizables.
-- Base lista para escalar a tracking, GPS y automatizaciones.
+La descripcion funcional y tecnica ampliada vive en [docs/ARCHITECTURE.md](C:\Users\eigua\OneDrive\Documentos\New project\docs\ARCHITECTURE.md).

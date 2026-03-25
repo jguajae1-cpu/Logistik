@@ -187,11 +187,13 @@ h3 {
 }
 
 .stats-grid,
-.cards-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.cards-grid,
+.summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .stats-card,
+.summary-card,
 .filters,
 .ticket-card,
 .form-grid,
@@ -199,11 +201,29 @@ h3 {
   padding: 24px;
 }
 
-.stats-card strong {
+.stats-card strong,
+.summary-card strong {
   display: block;
   margin-top: 10px;
   font-size: 2rem;
   font-family: var(--font-display), sans-serif;
+}
+
+.summary-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.summary-card {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.toolbar-row {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .filter-list {
@@ -371,6 +391,8 @@ h3 {
 
   .stats-grid,
   .cards-grid,
+  .summary-grid,
+  .toolbar-row,
   .ticket-grid,
   .detail-grid,
   .form-grid {
@@ -387,6 +409,8 @@ h3 {
 
   .stats-grid,
   .cards-grid,
+  .summary-grid,
+  .toolbar-row,
   .ticket-grid,
   .detail-grid,
   .form-grid {

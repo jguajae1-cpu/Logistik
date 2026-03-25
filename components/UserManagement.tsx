@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import type { AppRole, Conductor, Empresa, Transportista, Usuario } from "@/types";
 import { roleLabels } from "@/lib/constants";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -36,13 +36,37 @@ export function UserManagement({ usuarios, empresas, transportistas, conductores
       ])
     )
   );
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"todos" | AppRole>("todos");
   const [savingId, setSavingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const deferredSearch = useDeferredValue(search.trim().toLowerCase());
   const roleOptions = useMemo<AppRole[]>(
     () => ["admin", "operador", "cliente", "transportista", "conductor"],
     []
+  );
+
+  const filteredUsuarios = useMemo(() => {
+    return usuarios.filter((usuario) => {
+      const matchesRole = roleFilter === "todos" || drafts[usuario.id]?.rol === roleFilter;
+      const matchesSearch =
+        deferredSearch.length === 0 ||
+        usuario.nombre.toLowerCase().includes(deferredSearch) ||
+        usuario.email.toLowerCase().includes(deferredSearch);
+
+      return matchesRole && matchesSearch;
+    });
+  }, [deferredSearch, drafts, roleFilter, usuarios]);
+
+  const roleSummary = useMemo(
+    () =>
+      roleOptions.map((role) => ({
+        role,
+        total: usuarios.filter((usuario) => drafts[usuario.id]?.rol === role).length
+      })),
+    [drafts, roleOptions, usuarios]
   );
 
   async function saveUser(userId: string) {
@@ -76,9 +100,41 @@ export function UserManagement({ usuarios, empresas, transportistas, conductores
     <section className="card filters">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Gestión</p>
+          <p className="eyebrow">Gestion</p>
           <h2>GestionUsuarios</h2>
         </div>
+      </div>
+
+      <div className="summary-grid">
+        {roleSummary.map((item) => (
+          <article className="summary-card" key={item.role}>
+            <span className="label">{roleLabels[item.role]}</span>
+            <strong>{item.total}</strong>
+          </article>
+        ))}
+      </div>
+
+      <div className="toolbar-row">
+        <label className="field">
+          <span>Buscar</span>
+          <input
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Nombre o email"
+            value={search}
+          />
+        </label>
+
+        <label className="field">
+          <span>Filtrar por rol</span>
+          <select onChange={(event) => setRoleFilter(event.target.value as "todos" | AppRole)} value={roleFilter}>
+            <option value="todos">Todos</option>
+            {roleOptions.map((role) => (
+              <option key={role} value={role}>
+                {roleLabels[role]}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <div className="table-wrap">
@@ -91,11 +147,11 @@ export function UserManagement({ usuarios, empresas, transportistas, conductores
               <th>Empresa</th>
               <th>Transportista</th>
               <th>Conductor</th>
-              <th>Acción</th>
+              <th>Accion</th>
             </tr>
           </thead>
           <tbody>
-            {usuarios.map((usuario) => (
+            {filteredUsuarios.map((usuario) => (
               <tr key={usuario.id}>
                 <td>{usuario.nombre}</td>
                 <td>{usuario.email}</td>
@@ -147,7 +203,11 @@ export function UserManagement({ usuarios, empresas, transportistas, conductores
                         ...current,
                         [usuario.id]: {
                           ...current[usuario.id],
-                          transportista_id: event.target.value
+                          transportista_id: event.target.value,
+                          conductor_id:
+                            current[usuario.id].transportista_id === event.target.value
+                              ? current[usuario.id].conductor_id
+                              : ""
                         }
                       }))
                     }
@@ -203,9 +263,13 @@ export function UserManagement({ usuarios, empresas, transportistas, conductores
         </table>
       </div>
 
+      {filteredUsuarios.length === 0 && (
+        <p className="muted">No hay usuarios que coincidan con los filtros actuales.</p>
+      )}
+
       <p className="muted">
-        Los usuarios se crean al primer acceso por magic link y desde aquí puedes editar rol y
-        pertenencia operativa.
+        Los usuarios nacen desde Supabase Auth y aqui puedes ajustar su rol, empresa y relacion
+        operativa.
       </p>
       {message && <p className="success-text">{message}</p>}
       {error && <p className="error-text">{error}</p>}

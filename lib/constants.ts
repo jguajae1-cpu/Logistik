@@ -14,7 +14,7 @@ export const statusLabels: Record<TicketStatus, string> = {
   pendiente: "Pendiente",
   asignado: "Asignado",
   en_retiro: "En retiro",
-  en_transito: "En tránsito",
+  en_transito: "En transito",
   entregado: "Entregado",
   cancelado: "Cancelado"
 };
@@ -29,7 +29,7 @@ export const statusFlow: TicketStatus[] = [
 
 export const roleDashboardTitle: Record<AppRole, string> = {
   admin: "Panel global de la plataforma",
-  operador: "Operación logística central",
+  operador: "Operacion logistica central",
   cliente: "Solicitudes de tu empresa",
   transportista: "Asignaciones para tu transportista",
   conductor: "Viajes asignados"
